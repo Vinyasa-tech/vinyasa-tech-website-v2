@@ -1,0 +1,27 @@
+# Set default behavior to automatically normalize line endings to LF in the repo,
+# while checking out native line endings (CRLF on Windows, LF on Linux/macOS)
+* text=auto
+
+# Force LF (Linux/Unix) for files executed or parsed in Linux/Docker environments
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+Jenkinsfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+
+# Force CRLF (Windows) for Windows-only scripts and project files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sln text eol=crlf
+
+# Explicitly mark binary files so Git never modifies them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
