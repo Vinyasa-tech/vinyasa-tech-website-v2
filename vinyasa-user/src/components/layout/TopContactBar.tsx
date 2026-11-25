@@ -19,11 +19,11 @@ function TopContactBar() {
         <div className="flex items-center gap-5 xl:gap-7 2xl:gap-9">
           {/* EMAIL */}
           <a
-            href="mailto:vinyasagroup@gmail.com"
+            href="mailto:vinyasatechsolution@gmail.com"
             className="flex items-center gap-1.5 text-[10px] text-white transition-colors hover:text-[#D8D4F0] 2xl:text-[11px] min-[2400px]:text-xs"
           >
             <Mail className="h-3 w-3 shrink-0 text-[#D8D4F0] 2xl:h-3.5 2xl:w-3.5" />
-            vinyasagroup@gmail.com
+            vinyasatechsolution@gmail.com
           </a>
 
           <div className="h-3 w-px bg-white/20" />

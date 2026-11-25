@@ -154,7 +154,7 @@ function Footer() {
 
           {/* QUICK LINKS */}
 
-          <div className="order-2 ml-5 ">
+          <div className="order-2 ml-5">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white md:text-[13px]">
               Quick Links
             </h2>
@@ -203,10 +203,10 @@ function Footer() {
     
 
 <a
-  href="mailto:vinyasagroup@gmail.com"
+  href="mailto:vinyasatechsolution@gmail.com"
   className="mt-0.5 block whitespace-nowrap text-[11.5px] !leading-5 !text-white hover:!text-[#D8D4F0]"
 >
-  vinyasagroup@gmail.com
+  vinyasatechsolution@gmail.com
 </a>
 
   </div>

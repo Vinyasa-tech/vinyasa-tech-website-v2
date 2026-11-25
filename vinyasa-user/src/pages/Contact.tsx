@@ -49,7 +49,7 @@ function Contact() {
 
     if (Object.keys(newErrors).length > 0) return;
 
-    const companyEmail = "vinyasagroup@gmail.com";
+    const companyEmail = "vinyasatechsolution@gmail.com";
     const subject = `New Project Enquiry from ${name}`;
 
     const body = `Hello Vinyasa Team,
@@ -169,10 +169,10 @@ ${name}`;
                     </p>
 
                     <a
-                      href="mailto:vinyasagroup@gmail.com"
+                      href="mailto:vinyasatechsolution@gmail.com"
                       className="mt-1 block break-all text-sm font-normal !text-white transition-colors hover:!text-[#D8D4F0] sm:break-words sm:text-sm"
                     >
-                      vinyasagroup@gmail.com
+                      vinyasatechsolution@gmail.com
                     </a>
                   </div>
                 </div>
