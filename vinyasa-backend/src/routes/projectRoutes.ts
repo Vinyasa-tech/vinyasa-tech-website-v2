@@ -39,6 +39,19 @@ router.get(
   getAllProjectsController
 );
 
+
+// =====================================
+// DYNAMIC PUBLIC ROUTE
+// =====================================
+
+// Get one project by ID
+// Keep this route LAST
+router.get(
+  "/:id",
+  getProjectController
+);
+
+
 // Upload project logo separately
 router.post(
   "/upload-logo",
@@ -70,15 +83,6 @@ router.delete(
   deleteProjectController
 );
 
-// =====================================
-// DYNAMIC PUBLIC ROUTE
-// =====================================
 
-// Get one project by ID
-// Keep this route LAST
-router.get(
-  "/:id",
-  getProjectController
-);
 
 export default router;

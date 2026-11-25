@@ -154,7 +154,7 @@ function Footer() {
 
           {/* QUICK LINKS */}
 
-          <div className="order-2 ml-5">
+          <div className="order-2 ml-5 ">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white md:text-[13px]">
               Quick Links
             </h2>

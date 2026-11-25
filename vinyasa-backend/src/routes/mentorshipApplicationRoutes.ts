@@ -45,16 +45,6 @@ router.get(
 );
 
 /**
- * Submit a mentorship application
- * POST /api/mentorship-applications
- * Public
- */
-router.post(
-  "/",
-  createMentorshipApplicationController
-);
-
-/**
  * Get one mentorship application
  * GET /api/mentorship-applications/:id
  * Admin only
@@ -63,6 +53,17 @@ router.get(
   "/:id",
   protect,
   getMentorshipApplication
+);
+
+
+/**
+ * Submit a mentorship application
+ * POST /api/mentorship-applications
+ * Public
+ */
+router.post(
+  "/",
+  createMentorshipApplicationController
 );
 
 /**
