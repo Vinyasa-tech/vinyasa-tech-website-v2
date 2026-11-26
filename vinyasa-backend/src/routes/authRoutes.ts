@@ -1,12 +1,10 @@
 import { Router } from "express";
-
 import {
   registerAdmin,
   loginAdmin,
   getCurrentAdmin,
 } from "../controllers/authController";
-
-// import { protect } from "../middleware/authMiddleware";
+ import { protect } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -26,6 +24,5 @@ router.post("/login", loginAdmin);
  * Get currently logged-in admin
  * GET /api/auth/me
  */
-// router.get("/me", protect, getCurrentAdmin);
-
+ router.get("/me", protect, getCurrentAdmin);
 export default router;
