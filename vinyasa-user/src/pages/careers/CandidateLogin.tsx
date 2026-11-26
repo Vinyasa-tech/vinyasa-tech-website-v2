@@ -9,6 +9,8 @@ import {
   EyeOff,
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function CandidateLogin() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ export default function CandidateLogin() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/candidate-auth/login",
+  `${API_URL}/candidate-auth/login`,
         {
           method: "POST",
           headers: {

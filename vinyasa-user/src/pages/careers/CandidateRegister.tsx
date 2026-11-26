@@ -11,6 +11,8 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function CandidateRegister() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -54,7 +56,7 @@ export default function CandidateRegister() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/candidate-auth/register",
+  `${API_URL}/candidate-auth/register`,
         {
           method: "POST",
           headers: {

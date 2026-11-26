@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "../../services/authToken";
 
-const API_URL = "http://localhost:5000/api/mentorship-programs";
+const API_URL = `${import.meta.env.VITE_API_URL}/mentorship-programs`;
 
 type ProgramStatus = "active" | "inactive" | "upcoming" | "completed";
 
