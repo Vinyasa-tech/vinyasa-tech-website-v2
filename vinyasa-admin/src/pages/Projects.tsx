@@ -251,8 +251,8 @@ const Projects = () => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setLogoError("Image size must be 5MB or less.");
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError("Image size must be 2MB or less.");
 
       event.target.value = "";
       return;

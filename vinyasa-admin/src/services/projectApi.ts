@@ -5,6 +5,8 @@ import { getAuthToken } from "./authToken";
 const API_URL = import.meta.env.VITE_API_URL ||
 "http://localhost:5000/api/projects";
 
+const PROJECT_API_URL = `${API_URL.replace(/\/+$/, "")}/projects`;
+
 export interface Project {
   id: number;
   title: string;
@@ -33,7 +35,7 @@ interface ApiResponse<T> {
 }
 
 const projectApiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: PROJECT_API_URL,
 });
 
 // Attach authentication token
