@@ -71,7 +71,7 @@ const API_URL =
 
 const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
-const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
 const getImageSrc = (imagePath: string | null | undefined) => {
   if (!imagePath) return "";
@@ -172,7 +172,7 @@ const createCroppedImage = async (
   }
 
   throw new Error(
-    "The cropped image is still larger than 3 MB. Please choose another image."
+    "The cropped image is still larger than 2 MB. Please choose another image."
   );
 };
 
