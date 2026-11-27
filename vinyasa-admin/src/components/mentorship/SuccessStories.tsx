@@ -485,6 +485,8 @@ const SuccessStories = () => {
       !formData.program.trim() ||
       !formData.year.trim() ||
       !formData.role.trim() ||
+      !formData.title.trim() ||
+      !formData.company.trim() ||
       !formData.story.trim()
     ) {
       setError("Please fill in all required fields.");
@@ -1348,7 +1350,7 @@ const SuccessStories = () => {
                     htmlFor="story-title"
                     className="text-xs font-semibold text-[#0B2545] sm:text-[10px]"
                   >
-                    Current Position (Optional)
+                    Current Position <span className="text-red-500">*</span>
                   </label>
 
                   <input
@@ -1363,6 +1365,7 @@ const SuccessStories = () => {
                     }
                     placeholder="e.g. Software Developer"
                     className={inputClass}
+                    required
                   />
                 </div>
 
@@ -1372,7 +1375,7 @@ const SuccessStories = () => {
                     htmlFor="story-company"
                     className="text-xs font-semibold text-[#0B2545] sm:text-[10px]"
                   >
-                    Current Company (Optional)
+                    Current Company <span className="text-red-500">*</span>
                   </label>
 
                   <input
@@ -1387,6 +1390,7 @@ const SuccessStories = () => {
                     }
                     placeholder="Enter company name"
                     className={inputClass}
+                    required
                   />
                 </div>
 
@@ -1426,7 +1430,7 @@ const SuccessStories = () => {
                       </label>
 
                       <p className="mt-1.5 text-[10px] leading-4 text-[#667085] sm:text-[9px]">
-                        JPG, PNG or WEBP · Maximum 3 MB
+                        JPG, PNG or WEBP · Maximum 2 MB
                       </p>
 
                       {imageFile && (

@@ -806,7 +806,7 @@ const Projects = () => {
                       </span>
 
                       <span className="mt-0.5 text-[11px] text-[#98A2B3] sm:text-[9px]">
-                        PNG, JPG, JPEG or WEBP · Max 5MB
+                        PNG, JPG, JPEG or WEBP · Max 2 MB
                       </span>
 
                       {logoFileName && (

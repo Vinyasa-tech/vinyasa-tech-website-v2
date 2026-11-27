@@ -276,12 +276,12 @@ const MentorshipPrograms = () => {
 
     try {
       if (editingId !== null) {
-        await axios.put(`${API_URL}/${editingId}`, payload, {
+        await axios.put(`${MENTORSHIP_PROGRAMS_URL}/${editingId}`, payload, {
           headers: getAuthHeaders(),
         });
         setSuccess("Mentorship program updated successfully.");
       } else {
-        await axios.post(API_URL, payload, {
+        await axios.post(MENTORSHIP_PROGRAMS_URL, payload, {
           headers: getAuthHeaders(),
         });
         setSuccess("Mentorship program added successfully.");
@@ -315,7 +315,7 @@ const MentorshipPrograms = () => {
     }
 
     try {
-      await axios.delete(`${API_URL}/${id}`, {
+      await axios.delete(`${MENTORSHIP_PROGRAMS_URL}/${id}`, {
         headers: getAuthHeaders(),
       });
 

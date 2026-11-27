@@ -706,7 +706,7 @@ export default function CandidateDashboard() {
 
                     <Link
                       to="/careers"
-                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#3F3A8F] px-4 py-2.5 text-xs text-white transition-colors hover:bg-[#302A78]"
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#3F3A8F] px-4 py-2.5 text-xs !text-white transition-colors hover:bg-[#302A78]"
                     >
                       Browse Jobs
                       <ArrowRight size={14} />
