@@ -50,13 +50,14 @@ const emptyForm: StoryForm = {
 };
 
 const programOptions = [
-  "AI/ML",
+  "AI & Machine Learning",
   "Software & Mobile Engineering",
   "Web & Digital Solutions",
-  "Cloud",
+  "Cloud & Infrastructure",
   "Data Management",
   "Graphic Designing",
   "Digital Marketing",
+  "Data & Analysis",
 ];
 
 const currentYear = new Date().getFullYear();
@@ -66,10 +67,7 @@ const yearOptions = Array.from(
   (_, index) => String(currentYear - index)
 );
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+import { API_ORIGIN } from "../../config/constants";
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 

@@ -3,7 +3,10 @@ import axios from "axios";
 import type { Qualification } from "@/types/careers";
 import { getCandidateToken } from "@/lib/careersStorage";
 
-const API_URL = "http://localhost:5000/api/job-applications";
+import { API_URL } from "../config/constants";
+const api = axios.create({
+  baseURL: `${API_URL}/job-applications`,
+});
 
 export interface SubmitApplicationData {
   job_id: number;
@@ -16,9 +19,7 @@ export interface SubmitApplicationData {
   technical_skills: string[];
 }
 
-const api = axios.create({
-  baseURL: API_URL,
-});
+
 
 api.interceptors.request.use((config) => {
   const token = getCandidateToken();

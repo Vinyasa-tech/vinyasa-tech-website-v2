@@ -36,10 +36,11 @@ interface SuccessStory {
   testimonial: string;
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { API_URL, API_ORIGIN } from "../../config/constants";
 
-const API_URL = `${API_BASE_URL}/success-stories/published`;
+
+const SUCCESS_STORIES_API_URL =
+  `${API_URL}/success-stories/published`;
 
 const getImageUrl = (imagePath: string | null): string => {
   if (!imagePath) return defaultUserImage;
@@ -57,7 +58,7 @@ const getImageUrl = (imagePath: string | null): string => {
     : `/${imagePath}`;
 
   try {
-    return new URL(normalizedPath, API_BASE_URL).toString();
+    return new URL(normalizedPath, API_ORIGIN).toString();
   } catch {
     return defaultUserImage;
   }
@@ -80,7 +81,7 @@ const SuccessStories = () => {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(API_URL, {
+        const response = await axios.get(SUCCESS_STORIES_API_URL, {
           signal: controller.signal,
         });
 

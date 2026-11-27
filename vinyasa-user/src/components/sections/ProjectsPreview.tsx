@@ -14,9 +14,9 @@ interface Project {
   website: string | null;
   status?: "published" | "draft";
 }
+import { API_URL, API_ORIGIN } from "../../config/constants";
 
-const API_URL = "http://localhost:5000/api/projects";
-const API_ORIGIN = new URL(API_URL).origin;
+const PROJECTS_API_URL = `${API_URL}/projects`;
 
 const getProjectLogoSrc = (logo: string): string => {
   if (
@@ -51,7 +51,7 @@ function ProjectsPreview() {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(API_URL, {
+        const response = await axios.get(PROJECTS_API_URL, {
           signal: controller.signal,
         });
 

@@ -1,8 +1,8 @@
 import axios from "axios";
+import { API_URL } from "../config/constants";
 
-const API_URL =
-  `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}` +
-  "/mentorship-programs";
+const MENTORSHIP_PROGRAMS_API_URL =
+  `${API_URL}/mentorship-programs`;
 
 export interface WeeklyPlanItem {
   week: number;
@@ -21,7 +21,7 @@ export interface MentorshipProgram {
 }
 
 export async function getMentorshipPrograms(): Promise<MentorshipProgram[]> {
-  const response = await axios.get(API_URL);
+  const response = await axios.get(MENTORSHIP_PROGRAMS_API_URL);
 
   const result = response.data?.data ?? response.data;
 

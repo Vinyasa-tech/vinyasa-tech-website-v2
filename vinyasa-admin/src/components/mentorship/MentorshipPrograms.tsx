@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "../../services/authToken";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/mentorship-programs`;
+import { API_URL } from "../../config/constants";
+const MENTORSHIP_PROGRAMS_URL = `${API_URL}/mentorship-programs`;
 
 type ProgramStatus = "active" | "inactive" | "upcoming" | "completed";
 
@@ -136,7 +137,7 @@ const MentorshipPrograms = () => {
     setError("");
 
     try {
-      const response = await axios.get(API_URL, {
+      const response = await axios.get(MENTORSHIP_PROGRAMS_URL, {
         headers: getAuthHeaders(),
       });
 

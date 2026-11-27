@@ -11,9 +11,8 @@ import { motion } from "motion/react";
 
 import { fadeUp, viewport } from "@/lib/motion";
 
-const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
-).replace(/\/+$/, "");
+import { API_URL } from "../config/constants";
+
 
 interface MentorshipProgram {
   id: number;

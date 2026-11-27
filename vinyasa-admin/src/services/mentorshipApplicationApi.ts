@@ -1,9 +1,10 @@
 
 import { getAuthToken } from "./authToken";
+import { API_URL } from "../config/constants";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
+const MENTORSHIP_APPLICATIONS_URL =
+  `${API_URL}/mentorship-applications`;
+  
 export type MentorshipApplicationStatus =
   | "pending"
   | "approved"
@@ -46,7 +47,7 @@ async function request<T>(
   const token = getAuthToken();
 
   const response = await fetch(
-    `${API_URL}/mentorship-applications${endpoint}`,
+    `${MENTORSHIP_APPLICATIONS_URL}${endpoint}`,
     {
       ...options,
       headers: {

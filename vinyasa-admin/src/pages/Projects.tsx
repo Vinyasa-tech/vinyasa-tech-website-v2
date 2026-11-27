@@ -41,7 +41,7 @@ import type {
 
 type LogoMode = "path" | "upload";
 
-const API_ORIGIN = "http://localhost:5000";
+import { API_ORIGIN } from "../config/constants";
 
 const getProjectLogoSrc = (logo: string): string => {
   if (

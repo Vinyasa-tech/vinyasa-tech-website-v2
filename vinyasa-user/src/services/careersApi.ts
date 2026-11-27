@@ -2,11 +2,10 @@
 import axios from "axios";
 import { getCandidateToken } from "@/lib/careersStorage";
 
+import { API_URL } from "../config/constants";
 /* Backend connection */
 const careersApi = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000/api",
+  baseURL: API_URL,
 
   headers: {
     "Content-Type": "application/json",

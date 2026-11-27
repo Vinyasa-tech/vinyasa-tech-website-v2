@@ -1,11 +1,10 @@
 import axios from "axios";
 import { getAuthToken } from "./authToken";
 
-const API_URL =  `${import.meta.env.VITE_API_URL || 
-  "http://localhost:5000/api"}/mentorship-programs`;
+import { API_URL } from "../config/constants";
 
 const mentorshipProgramApi = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/mentorship-programs`,
 });
 
 mentorshipProgramApi.interceptors.request.use((config) => {
