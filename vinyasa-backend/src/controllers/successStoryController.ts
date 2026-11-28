@@ -263,6 +263,8 @@ export const updateSuccessStoryController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  let databaseUpdated = false;
+
   try {
     const id = Number(req.params.id);
 
@@ -297,8 +299,10 @@ export const updateSuccessStoryController = async (
       program,
       year,
       status,
+      removeImage,
     } = req.body;
 
+    // Validate name
     if (
       name !== undefined &&
       (typeof name !== "string" || !name.trim())
@@ -312,6 +316,7 @@ export const updateSuccessStoryController = async (
       return;
     }
 
+    // Validate testimonial
     if (
       story !== undefined &&
       (typeof story !== "string" || !story.trim())
@@ -325,6 +330,7 @@ export const updateSuccessStoryController = async (
       return;
     }
 
+    // Validate status
     if (status !== undefined && !validStatus(status)) {
       cleanupNewUpload(req);
 
@@ -335,6 +341,7 @@ export const updateSuccessStoryController = async (
       return;
     }
 
+    // Validate program
     if (program !== undefined && typeof program !== "string") {
       cleanupNewUpload(req);
 
@@ -345,6 +352,7 @@ export const updateSuccessStoryController = async (
       return;
     }
 
+    // Validate year
     if (
       year !== undefined &&
       year !== "" &&
@@ -359,8 +367,22 @@ export const updateSuccessStoryController = async (
       return;
     }
 
+    // Check image removal request
+    const shouldRemoveImage = removeImage === "true";
+
+    // Get newly uploaded image
     const newImagePath = getUploadedImagePath(req);
 
+    let imageUrl: string | null | undefined = undefined;
+
+    // New image takes priority
+    if (newImagePath) {
+      imageUrl = newImagePath;
+    } else if (shouldRemoveImage) {
+      imageUrl = null;
+    }
+
+    // Update database
     const updated = await updateSuccessStory(id, {
       name:
         name !== undefined
@@ -403,7 +425,7 @@ export const updateSuccessStoryController = async (
           ? year.trim() || null
           : undefined,
 
-      image_url: newImagePath ?? undefined,
+      image_url: imageUrl,
       status,
     });
 
@@ -417,22 +439,39 @@ export const updateSuccessStoryController = async (
       return;
     }
 
-    // Delete previous image only after successful update
-    if (newImagePath && existingStory.image_url) {
-      deleteUploadedImage(existingStory.image_url);
+    databaseUpdated = true;
+
+    // Delete previous image after successful database update
+    if (
+      (newImagePath || shouldRemoveImage) &&
+      existingStory.image_url
+    ) {
+      try {
+        deleteUploadedImage(existingStory.image_url);
+      } catch (imageError) {
+        console.error(
+          "Unable to delete previous alumni image:",
+          imageError
+        );
+      }
     }
 
     const updatedStory = await getSuccessStoryById(id);
 
     res.status(200).json({
       success: true,
-      message: "Success story updated successfully",
+      message:
+        shouldRemoveImage && !newImagePath
+          ? "Success story image removed successfully"
+          : "Success story updated successfully",
       data: updatedStory,
     });
   } catch (error) {
     console.error("Update success story error:", error);
 
-    cleanupNewUpload(req);
+    if (!databaseUpdated) {
+      cleanupNewUpload(req);
+    }
 
     res.status(500).json({
       success: false,

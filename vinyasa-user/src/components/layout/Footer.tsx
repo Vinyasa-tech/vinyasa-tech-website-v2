@@ -273,9 +273,7 @@ function Footer() {
           </p>
         </div>
       </div>
-      <div className="flex justify-end py-0.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-full bg-white"></span>
-      </div>
+      
     </footer>
   );
 }

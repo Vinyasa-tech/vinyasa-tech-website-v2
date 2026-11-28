@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChangeEvent, FormEvent } from "react";
@@ -19,13 +20,16 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { motion } from "motion/react";
+
 import {
   createSuccessStory,
   deleteSuccessStory,
   getSuccessStories,
   updateSuccessStory,
 } from "../../services/successStoryApi";
+
 import type { ApiSuccessStory } from "../../services/successStoryApi";
+import { API_ORIGIN } from "../../config/constants";
 
 interface StoryForm {
   name: string;
@@ -67,17 +71,18 @@ const yearOptions = Array.from(
   (_, index) => String(currentYear - index)
 );
 
-import { API_ORIGIN } from "../../config/constants";
-
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
-const getImageSrc = (imagePath: string | null | undefined) => {
+const getImageSrc = (
+  imagePath: string | null | undefined
+) => {
   if (!imagePath) return "";
 
   if (
     imagePath.startsWith("http://") ||
     imagePath.startsWith("https://") ||
-    imagePath.startsWith("blob:")
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("data:")
   ) {
     return imagePath;
   }
@@ -116,16 +121,19 @@ const getErrorMessage = (error: unknown): string => {
     : "Something went wrong.";
 };
 
+// Convert the selected image into a cropped JPEG blob.
 const createCroppedImage = async (
   imageSrc: string,
   pixelCrop: Area
 ): Promise<Blob> => {
   const image = new Image();
-  image.src = imageSrc;
 
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
-    image.onerror = () => reject(new Error("Unable to load image."));
+    image.onerror = () =>
+      reject(new Error("Unable to load the selected image."));
+
+    image.src = imageSrc;
   });
 
   const maxDimension = 1200;
@@ -135,8 +143,15 @@ const createCroppedImage = async (
     maxDimension / Math.max(pixelCrop.width, pixelCrop.height)
   );
 
-  const outputWidth = Math.max(1, Math.round(pixelCrop.width * scale));
-  const outputHeight = Math.max(1, Math.round(pixelCrop.height * scale));
+  const outputWidth = Math.max(
+    1,
+    Math.round(pixelCrop.width * scale)
+  );
+
+  const outputHeight = Math.max(
+    1,
+    Math.round(pixelCrop.height * scale)
+  );
 
   const canvas = document.createElement("canvas");
 
@@ -145,7 +160,9 @@ const createCroppedImage = async (
 
   const context = canvas.getContext("2d");
 
-  if (!context) throw new Error("Canvas is not supported.");
+  if (!context) {
+    throw new Error("Canvas is not supported.");
+  }
 
   context.drawImage(
     image,
@@ -164,9 +181,9 @@ const createCroppedImage = async (
       canvas.toBlob(resolve, "image/jpeg", quality);
     });
 
-    if (!blob) continue;
-
-    if (blob.size <= MAX_IMAGE_SIZE_BYTES) return blob;
+    if (blob && blob.size <= MAX_IMAGE_SIZE_BYTES) {
+      return blob;
+    }
   }
 
   throw new Error(
@@ -196,8 +213,13 @@ const SuccessStories = () => {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
+
+  const [removeExistingImage, setRemoveExistingImage] =
+    useState(false);
+
   const [showCropper, setShowCropper] = useState(false);
-  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const [pendingImageFile, setPendingImageFile] =
+    useState<File | null>(null);
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -212,6 +234,7 @@ const SuccessStories = () => {
     left: number;
   } | null>(null);
 
+  // Close action menu when scrolling or resizing.
   useEffect(() => {
     if (openMenu === null) return;
 
@@ -292,8 +315,10 @@ const SuccessStories = () => {
 
     setImageFile(null);
     setImagePreview("");
+    setRemoveExistingImage(false);
     setPendingImageFile(null);
     setShowCropper(false);
+
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
@@ -301,12 +326,15 @@ const SuccessStories = () => {
 
   // OPEN ADD FORM
   const openAddForm = () => {
+    resetImage();
+
     setEditingStory(null);
     setFormData({ ...emptyForm });
-    resetImage();
+
     setError("");
     setSuccessMessage("");
     setShowForm(true);
+
     setOpenMenu(null);
     setMenuPosition(null);
   };
@@ -329,10 +357,14 @@ const SuccessStories = () => {
     });
 
     setImageFile(null);
+    setPendingImageFile(null);
+    setRemoveExistingImage(false);
     setImagePreview(getImageSrc(story.image_url));
+
     setError("");
     setSuccessMessage("");
     setShowForm(true);
+
     setOpenMenu(null);
     setMenuPosition(null);
   };
@@ -344,12 +376,15 @@ const SuccessStories = () => {
     setShowForm(false);
     setEditingStory(null);
     setFormData({ ...emptyForm });
+
     resetImage();
     setError("");
   };
 
-  // IMAGE UPLOAD
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+  // IMAGE SELECTION
+  const handleImageChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -367,12 +402,12 @@ const SuccessStories = () => {
     }
 
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      alert("Image size must not exceed 3 MB. Please choose a smaller image.");
-      setError("Image size must not exceed 3 MB. Please choose a smaller image.");
+      setError("Image size must not exceed 2 MB.");
       event.target.value = "";
       return;
     }
 
+    // Release the previous temporary image URL.
     if (imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
@@ -380,22 +415,31 @@ const SuccessStories = () => {
     const previewUrl = URL.createObjectURL(file);
 
     setError("");
+    setImageFile(null);
     setPendingImageFile(file);
     setImagePreview(previewUrl);
+    setRemoveExistingImage(false);
+
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
+
     setShowCropper(true);
 
+    // Allows selecting the same image again.
     event.target.value = "";
   };
 
+  // CROP COMPLETE
   const onCropComplete = (_area: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
   };
 
+  // APPLY CROPPED IMAGE
   const applyCrop = async () => {
-    if (!imagePreview || !croppedAreaPixels || !pendingImageFile) return;
+    if (!imagePreview || !croppedAreaPixels || !pendingImageFile) {
+      return;
+    }
 
     try {
       setError("");
@@ -405,22 +449,26 @@ const SuccessStories = () => {
         croppedAreaPixels
       );
 
-      if (croppedBlob.size > MAX_IMAGE_SIZE_BYTES) {
-        throw new Error("The cropped image must not exceed 3 MB.");
-      }
-
       const croppedFile = new File(
         [croppedBlob],
         "alumni-profile.jpg",
-        { type: "image/jpeg" }
+        {
+          type: "image/jpeg",
+        }
       );
 
       const oldPreview = imagePreview;
+      const newPreview = URL.createObjectURL(croppedBlob);
 
       setImageFile(croppedFile);
-      setImagePreview(URL.createObjectURL(croppedBlob));
+      setImagePreview(newPreview);
+
       setPendingImageFile(null);
       setShowCropper(false);
+
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
 
       if (oldPreview.startsWith("blob:")) {
         URL.revokeObjectURL(oldPreview);
@@ -436,6 +484,7 @@ const SuccessStories = () => {
     }
   };
 
+  // CANCEL CROPPING
   const cancelCrop = () => {
     if (imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
@@ -456,19 +505,30 @@ const SuccessStories = () => {
     setShowCropper(false);
   };
 
-  // REMOVE SELECTED IMAGE
+  // REMOVE IMAGE
   const removeSelectedImage = () => {
     if (imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
 
-    setImageFile(null);
+    // Remove the newly selected image and restore the saved image.
+    if (imageFile || pendingImageFile) {
+      setImageFile(null);
+      setPendingImageFile(null);
+      setShowCropper(false);
 
-    if (editingStory?.image_url) {
-      setImagePreview(getImageSrc(editingStory.image_url));
-    } else {
-      setImagePreview("");
+      if (editingStory?.image_url && !removeExistingImage) {
+        setImagePreview(getImageSrc(editingStory.image_url));
+      } else {
+        setImagePreview("");
+      }
+
+      return;
     }
+
+    // Remove the existing saved image.
+    setImagePreview("");
+    setRemoveExistingImage(Boolean(editingStory?.image_url));
   };
 
   // SUBMIT FORM
@@ -493,6 +553,12 @@ const SuccessStories = () => {
       return;
     }
 
+    // Do not submit while an image is still waiting to be cropped.
+    if (pendingImageFile) {
+      setError("Please apply or cancel the selected image before saving.");
+      return;
+    }
+
     const payload = new FormData();
 
     payload.append("name", formData.name.trim());
@@ -506,6 +572,8 @@ const SuccessStories = () => {
 
     if (imageFile) {
       payload.append("image", imageFile);
+    } else if (editingStory && removeExistingImage) {
+      payload.append("removeImage", "true");
     }
 
     try {
@@ -528,6 +596,7 @@ const SuccessStories = () => {
       setShowForm(false);
       setEditingStory(null);
       setFormData({ ...emptyForm });
+
       resetImage();
 
       setSuccessMessage(
@@ -865,28 +934,26 @@ const SuccessStories = () => {
                     {/* ALUMNI */}
                     <td className="px-4 py-3">
                       <div className="flex min-w-[150px] items-center gap-2.5">
-                        {story.image_url ? (
-                          <img
-                            src={getImageSrc(story.image_url)}
-                            alt={story.name}
-                            onError={(event) => {
-                              event.currentTarget.style.display = "none";
-                            }}
-                            className="h-8 w-8 shrink-0 rounded-full border border-[#E5E7EB] object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#302A78] text-xs font-semibold text-white">
+                        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#302A78] text-xs font-semibold text-white">
+                          <span aria-hidden="true">
                             {story.name?.charAt(0).toUpperCase() || "A"}
-                          </div>
-                        )}
+                          </span>
+
+                          {story.image_url && (
+                            <img
+                              src={getImageSrc(story.image_url)}
+                              alt={`${story.name} profile`}
+                              onError={(event) => {
+                                event.currentTarget.style.display = "none";
+                              }}
+                              className="absolute inset-0 h-full w-full rounded-full object-cover"
+                            />
+                          )}
+                        </div>
 
                         <div className="min-w-0">
                           <p className="truncate text-[11px] font-semibold text-[#0B2545]">
                             {story.name}
-                          </p>
-
-                          <p className="mt-0.5 text-[9px] text-[#98A2B3]">
-                            Alumni #{story.id}
                           </p>
                         </div>
                       </div>
@@ -1071,7 +1138,7 @@ const SuccessStories = () => {
         )}
       </div>
 
-      {/* ALUMNI IMAGE CROPPER */}
+      {/* IMAGE CROPPER */}
       {showCropper && imagePreview && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 p-3">
           <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
@@ -1401,12 +1468,18 @@ const SuccessStories = () => {
                   </label>
 
                   <div className="mt-1.5 flex items-center gap-3 rounded-lg border border-dashed border-[#C9C6E5] bg-[#FAFAFD] p-2.5">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#E5E7EB] bg-white">
+                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-white">
                       {imagePreview ? (
                         <img
+                          key={imagePreview}
                           src={imagePreview}
                           alt="Alumni preview"
-                          className="h-full w-full rounded-full object-cover"
+                          className="absolute inset-0 h-full w-full rounded-full object-cover"
+                          onError={() => {
+                            setError(
+                              "Unable to display the selected image. Please choose another image."
+                            );
+                          }}
                         />
                       ) : (
                         <ImageIcon
@@ -1439,9 +1512,15 @@ const SuccessStories = () => {
                         </p>
                       )}
 
-                      {!imageFile && editingStory?.image_url && (
+                      {!imageFile && editingStory?.image_url && !removeExistingImage && (
                         <p className="mt-1 text-[10px] text-[#667085] sm:text-[9px]">
                           Existing photo will be retained.
+                        </p>
+                      )}
+
+                      {removeExistingImage && (
+                        <p className="mt-1 text-[10px] text-red-600 sm:text-[9px]">
+                          Existing photo will be removed when saved.
                         </p>
                       )}
                     </div>
@@ -1529,7 +1608,7 @@ const SuccessStories = () => {
 
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || Boolean(pendingImageFile)}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#3F3A8F] px-4 text-xs font-medium text-white transition hover:bg-[#0B2545] disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:text-[10px]"
                 >
                   {saving ? (

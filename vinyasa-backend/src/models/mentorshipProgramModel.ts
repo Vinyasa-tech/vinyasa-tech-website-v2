@@ -146,7 +146,7 @@ export const getAllMentorshipPrograms =
       `
       SELECT ${SELECT_COLUMNS}
       FROM mentorship_programs
-      ORDER BY id DESC
+      ORDER BY id ASC
       `
     );
 
@@ -305,7 +305,7 @@ export const getMentorshipProgramsByStatus = async (
     SELECT ${SELECT_COLUMNS}
     FROM mentorship_programs
     WHERE status = ?
-    ORDER BY id DESC
+    ORDER BY id ASC
     `,
     [status]
   );

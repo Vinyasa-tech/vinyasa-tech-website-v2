@@ -73,7 +73,7 @@ export const getAllJobOpenings = async (): Promise<JobOpening[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT ${JOB_COLUMNS}
      FROM job_openings
-     ORDER BY id DESC`
+     ORDER BY id ASC`
   );
 
   return rows as JobOpening[];
@@ -193,7 +193,7 @@ export const getJobOpeningsByStatus = async (
     `SELECT ${JOB_COLUMNS}
      FROM job_openings
      WHERE status = ?
-     ORDER BY id DESC`,
+     ORDER BY id ASC`,
     [status]
   );
 

@@ -144,6 +144,10 @@ export const updateSuccessStory = async (
     values.push(data.story);
   }
 
+  // IMAGE UPDATE / REMOVE
+  // undefined = retain existing image
+  // null = remove existing image
+  // string = save new image path
   if (data.image_url !== undefined) {
     fields.push("image_url = ?");
     values.push(data.image_url);
@@ -208,7 +212,7 @@ export const getSuccessStoriesByStatus = async (
       image_url, status, created_by, created_at, updated_at
      FROM success_stories
      WHERE status = ?
-     ORDER BY id DESC`,
+     ORDER BY id ASC`,
     [status]
   );
 

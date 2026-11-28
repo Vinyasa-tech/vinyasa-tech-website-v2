@@ -635,31 +635,28 @@ const MentorshipPrograms = () => {
                   </div>
 
                   {/* CARD ACTIONS */}
-                  <div className="mt-3 flex items-center justify-between border-t border-[#F0EFF7] px-3.5 py-2.5 dark:border-[#514C87]">
-                    <span className="text-xs text-[#9998A7] dark:text-[#A6A3C8]">
-                      Program #{program.id}
-                    </span>
+               
+<div className="mt-3 flex items-center justify-end border-t border-[#F0EFF7] px-3.5 py-2.5 dark:border-[#514C87]">
+  <div className="flex items-center gap-2">
+    <button
+      type="button"
+      onClick={() => openEditModal(program)}
+      className="inline-flex h-9 min-w-[90px] items-center gap-1.5 rounded-lg border border-[#D8D7ED] px-5 text-xs font-semibold text-[#3F3A8F] transition hover:bg-[#EEF0FA] dark:border-[#625D9A] dark:text-[#D8D4F0] dark:hover:bg-[#454078]"
+    >
+      <Pencil size={13} />
+      Edit
+    </button>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(program)}
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-[#D8D7ED] px-2.5 text-xs font-semibold text-[#3F3A8F] transition hover:bg-[#EEF0FA] dark:border-[#625D9A] dark:text-[#D8D4F0] dark:hover:bg-[#454078]"
-                      >
-                        <Pencil size={12} />
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(program.id)}
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-[#F2C7C7] px-2.5 text-xs font-semibold text-[#B42318] transition hover:bg-[#FDECEC] dark:border-[#85434A] dark:text-[#FFB8B8] dark:hover:bg-[#572D38]"
-                      >
-                        <Trash2 size={12} />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+    <button
+      type="button"
+      onClick={() => void handleDelete(program.id)}
+      className="inline-flex h-9 min-w-[90px] items-center gap-1.5 rounded-lg border border-[#F2C7C7] px-5 text-xs font-semibold text-[#B42318] transition hover:bg-[#FDECEC] dark:border-[#85434A] dark:text-[#FFB8B8] dark:hover:bg-[#572D38]"
+    >
+      <Trash2 size={13} />
+      Delete
+    </button>
+  </div>
+</div>
                 </article>
               );
             })}

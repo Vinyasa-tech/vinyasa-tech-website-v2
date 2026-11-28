@@ -5,7 +5,6 @@ import type { ComponentType } from "react";
 import {
   ArrowUpRight,
   BriefcaseBusiness,
-  CheckCircle2,
   Clock3,
   FolderKanban,
   GraduationCap,
@@ -24,10 +23,21 @@ import {
   getApiError,
 } from "../services/careersApi";
 
+import {
+  getMentorshipApplications,
+  type MentorshipApplication,
+} from "../services/mentorshipApplicationApi";
+
+import {
+  getMentorshipPrograms,
+} from "../services/mentorshipProgramApi";
+
 import type {
   ApiJob,
   ApiApplication,
 } from "../services/careersApi";
+
+
 
 interface StatCardProps {
   label: string;
@@ -35,6 +45,11 @@ interface StatCardProps {
   detail: string;
   icon: ComponentType<{ size?: number; className?: string }>;
   loading: boolean;
+}
+
+interface DashboardProgram {
+  id?: number | string;
+  title?: string;
 }
 
 const quickActions = [
@@ -70,6 +85,45 @@ const quickActions = [
   },
 ];
 
+// EXTRACT ARRAY FROM API RESPONSE
+
+const extractArray = <T,>(
+  response: unknown,
+  possibleKeys: string[] = [],
+): T[] => {
+  if (Array.isArray(response)) {
+    return response as T[];
+  }
+
+  if (!response || typeof response !== "object") {
+    return [];
+  }
+
+  const result = response as Record<string, unknown>;
+
+  if (Array.isArray(result.data)) {
+    return result.data as T[];
+  }
+
+  for (const key of possibleKeys) {
+    if (Array.isArray(result[key])) {
+      return result[key] as T[];
+    }
+  }
+
+  if (result.data && typeof result.data === "object") {
+    const nested = result.data as Record<string, unknown>;
+
+    for (const key of possibleKeys) {
+      if (Array.isArray(nested[key])) {
+        return nested[key] as T[];
+      }
+    }
+  }
+
+  return [];
+};
+
 // STAT CARD
 
 const StatCard = ({
@@ -80,7 +134,6 @@ const StatCard = ({
   loading,
 }: StatCardProps) => (
   <div className="flex h-full min-w-0 flex-col rounded-xl border border-[#E7E6F1] bg-white p-3 transition-all duration-200 hover:border-[#BDB9DD] hover:shadow-[0_6px_20px_rgba(37,35,95,0.05)] sm:p-3.5 md:p-4 xl:p-4">
-
     <div className="flex min-w-0 items-center justify-between gap-2">
       <p className="min-w-0 flex-1 text-[12px] font-medium leading-5 text-[#77778A] sm:text-[11px] md:text-xs">
         {label}
@@ -138,6 +191,14 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState<ApiJob[]>([]);
   const [applications, setApplications] = useState<ApiApplication[]>([]);
 
+  const [mentorshipPrograms, setMentorshipPrograms] = useState<
+    DashboardProgram[]
+  >([]);
+
+  const [mentorshipApplications, setMentorshipApplications] = useState<
+    MentorshipApplication[]
+  >([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -149,24 +210,52 @@ const Dashboard = () => {
         setLoading(true);
         setError("");
 
-        const [jobsResponse, applicationsResponse] =
-          await Promise.all([
-            getJobs(),
-            getApplications(),
-          ]);
+        const [
+          jobsResponse,
+          applicationsResponse,
+          programsResponse,
+          mentorshipApplicationsResponse,
+        ] = await Promise.all([
+          getJobs(),
+          getApplications(),
+          getMentorshipPrograms(),
+          getMentorshipApplications(),
+        ]);
 
         if (!active) return;
+
+        // JOB DATA
 
         const jobsData = jobsResponse.data.data;
         const applicationsData = applicationsResponse.data.data;
 
-        setJobs(Array.isArray(jobsData) ? jobsData : []);
+        setJobs(
+          Array.isArray(jobsData) ? jobsData : [],
+        );
 
         setApplications(
           Array.isArray(applicationsData)
             ? applicationsData
             : [],
         );
+
+        // MENTORSHIP PROGRAM DATA
+
+        const programsData = extractArray<DashboardProgram>(
+          programsResponse,
+          ["programs", "mentorshipPrograms"],
+        );
+
+        setMentorshipPrograms(programsData);
+
+        // MENTORSHIP APPLICATION DATA
+
+        setMentorshipApplications(
+          Array.isArray(mentorshipApplicationsResponse)
+            ? mentorshipApplicationsResponse
+            : [],
+        );
+
       } catch (err) {
         if (!active) return;
 
@@ -198,7 +287,12 @@ const Dashboard = () => {
     (application) => application.status === "new",
   ).length;
 
-  // LATEST FIVE APPLICATIONS
+  const pendingMentorshipApplications =
+    mentorshipApplications.filter(
+      (application) => application.status === "pending",
+    ).length;
+
+  // LATEST FIVE JOB APPLICATIONS
 
   const recentApplications = [...applications]
     .sort((a, b) => {
@@ -209,9 +303,15 @@ const Dashboard = () => {
     })
     .slice(0, 5);
 
-  // LIVE STATISTICS
+  // FOUR MAIN DASHBOARD STATISTICS
 
   const stats = [
+    {
+      label: "Total Mentorship Programs",
+      value: mentorshipPrograms.length,
+      detail: "Available mentorship programs",
+      icon: GraduationCap,
+    },
     {
       label: "Total Job Openings",
       value: jobs.length,
@@ -219,21 +319,15 @@ const Dashboard = () => {
       icon: BriefcaseBusiness,
     },
     {
-      label: "Active Job Openings",
-      value: activeJobs,
-      detail: "Currently accepting applications",
-      icon: CheckCircle2,
+      label: "Mentorship Applications",
+      value: mentorshipApplications.length,
+      detail: `${pendingMentorshipApplications} waiting for review`,
+      icon: Users,
     },
     {
       label: "Job Applications",
       value: applications.length,
-      detail: "Total applications received",
-      icon: Users,
-    },
-    {
-      label: "New Applications",
-      value: newApplications,
-      detail: "Waiting for review",
+      detail: `${newApplications} waiting for review`,
       icon: UserRound,
     },
   ];
@@ -291,7 +385,7 @@ const Dashboard = () => {
               </h2>
 
               <p className="mt-1 text-[11px] text-[#9998A7] sm:text-[10px] md:text-[11px]">
-                Live information from your careers database.
+                Live information from your database.
               </p>
             </div>
 
@@ -304,7 +398,7 @@ const Dashboard = () => {
             </span>
           </div>
 
-          {/* TWO COLUMNS ON MOBILE */}
+          {/* FOUR STATISTICS */}
 
           <div className="grid w-full min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] gap-2 sm:gap-3 md:gap-4 lg:grid-cols-4 xl:gap-5">
 
@@ -339,7 +433,7 @@ const Dashboard = () => {
 
         <div className="grid w-full min-w-0 grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:gap-6">
 
-          {/* RECENT APPLICATIONS */}
+          {/* RECENT JOB APPLICATIONS */}
 
           <section className="w-full min-w-0 overflow-hidden rounded-xl border border-[#E7E6F1] bg-white">
 
@@ -448,8 +542,6 @@ const Dashboard = () => {
               </p>
             </div>
 
-            {/* QUICK ACCESS GRID */}
-
             <div className="grid w-full min-w-0 grid-cols-2 gap-2.5 sm:gap-3 xl:gap-4">
 
               {quickActions.map((action) => {
@@ -501,53 +593,51 @@ const Dashboard = () => {
               </h2>
 
               <p className="mt-1 text-[11px] text-[#9998A7] sm:mt-0.5 sm:text-[10px]">
-                Current careers information.
+                Current careers and mentorship information.
               </p>
             </div>
 
           </div>
 
-          {/* TWO COLUMNS ON MOBILE */}
-
           <div className="mt-3.5 grid w-full min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] gap-2.5 sm:mt-3 sm:gap-3 md:gap-4 lg:grid-cols-4 xl:gap-5">
 
             <div className="min-w-0 rounded-lg bg-[#F8F8FC] p-3 sm:p-3 md:p-4">
               <p className="break-words text-[11px] leading-5 text-[#9998A7] sm:text-[10px]">
-                Total Positions
+                Mentorship Programs
               </p>
 
               <p className="mt-1.5 text-base font-semibold text-[#25224F] sm:mt-1 sm:text-base md:text-lg">
+                {loading ? "—" : mentorshipPrograms.length}
+              </p>
+            </div>
+
+            <div className="min-w-0 rounded-lg bg-[#F8F8FC] p-3 sm:p-3 md:p-4">
+              <p className="break-words text-[11px] leading-5 text-[#9998A7] sm:text-[10px]">
+                Job Openings
+              </p>
+
+              <p className="mt-1.5 text-base font-semibold text-[#3F3A8F] sm:mt-1 sm:text-base md:text-lg">
                 {loading ? "—" : jobs.length}
               </p>
             </div>
 
             <div className="min-w-0 rounded-lg bg-[#F8F8FC] p-3 sm:p-3 md:p-4">
               <p className="break-words text-[11px] leading-5 text-[#9998A7] sm:text-[10px]">
-                Open Positions
-              </p>
-
-              <p className="mt-1.5 text-base font-semibold text-[#3F3A8F] sm:mt-1 sm:text-base md:text-lg">
-                {loading ? "—" : activeJobs}
-              </p>
-            </div>
-
-            <div className="min-w-0 rounded-lg bg-[#F8F8FC] p-3 sm:p-3 md:p-4">
-              <p className="break-words text-[11px] leading-5 text-[#9998A7] sm:text-[10px]">
-                Applications
+                Mentorship Applications
               </p>
 
               <p className="mt-1.5 text-base font-semibold text-[#25224F] sm:mt-1 sm:text-base md:text-lg">
-                {loading ? "—" : applications.length}
+                {loading ? "—" : mentorshipApplications.length}
               </p>
             </div>
 
             <div className="min-w-0 rounded-lg bg-[#F8F8FC] p-3 sm:p-3 md:p-4">
               <p className="break-words text-[11px] leading-5 text-[#9998A7] sm:text-[10px]">
-                Awaiting Review
+                Job Applications
               </p>
 
               <p className="mt-1.5 text-base font-semibold text-[#3F3A8F] sm:mt-1 sm:text-base md:text-lg">
-                {loading ? "—" : newApplications}
+                {loading ? "—" : applications.length}
               </p>
             </div>
 
